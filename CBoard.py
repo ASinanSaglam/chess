@@ -108,8 +108,8 @@ class CBoard(BaseModule):
             self.send_now(ProM)
         elif msg.mtype == "START_GAME":
             self.add_players(msg.players)
-        elif msg.mtype == "QUIT_GAME":
-            print("Printing history before quitting")
+        elif msg.mtype == "PRINT_HISTORY":
+            print("Printing history")
             print(",".join(self.inp_history))
         else:
             pass

@@ -1,6 +1,7 @@
 from base_modules import BaseModule
 from Players import HumanPlayer, AIPlayer
-from msgs import ReadingStatus, RenderMenu, InvalidCommand, DisplayBoard, StartGame
+from msgs import ReadingStatus, RenderMenu, InvalidCommand, DisplayBoard, StartGame, \
+                 PrintHistory, NullMsg
 
 class GameState(BaseModule):
     def __init__(self):
@@ -14,15 +15,40 @@ class GameState(BaseModule):
         self.menu_dict = {"main menu": ["new game","load game","settings","exit game"],
                           "new game": ["single player", "local multi player"],
                           "load game": ["not_implemented"], 
-                          "settings": ["not_implemented"], 
+                          "settings": ["set AI", "show hist"],
+                          "set AI": ["not_implemented"], 
+                          "show hist": ["set_hist_on_quit"], 
                           "exit game": ["quit_game"], 
                           "single player": ["new_single"], 
                           "local multi player": ["new_lmulti"]}
 
+    def load_opts(self, filename='.cmasher_opts.yaml'):
+        import os, yaml
+        if os.path.isfile(filename):
+            opts = open('.cmasher_opts.yaml', 'r')
+            self.opts_dict = yaml.load(opts)
+        else:
+            # Defaults here
+            self.opts_dict = {'ai_diff': 1,
+                         'ai_type': 'random',
+                         'print_hist_on_quit': 'True'}
+            self.save_opts()
+
+
+    def save_opts(self, filename='.cmasher_opts.yaml'):
+        import os, yaml
+        if os.path.isfile(filename):
+            os.remove(filename)
+        with open(filename, 'w') as ofile:
+            yaml.dump(self.opts_dict, ofile, default_flow_style=True)
+        
     def handle_msg(self, msg):
         # Handle quitting
         if msg.mtype == "QUIT_GAME":
             print("Quitting game!")
+            self.save_opts()
+            if self.opts_dict['print_hist_on_quit'] == 'True':
+                self.send_now(PrintHistory())
             self.running = False
         # Handle invalid stuff
         elif msg.mtype == "INVALID_COMMAND":
@@ -43,6 +69,7 @@ class GameState(BaseModule):
             self.in_game = True
             self.send_now(DisplayBoard())
         elif msg.mtype == "INIT_GAME":
+            self.load_opts()
             # Initialize game, we are in menus now
             if self.menu_state != "main menu":
                 self.menu_state = "main menu"
@@ -69,6 +96,13 @@ class GameState(BaseModule):
             Player1 = HumanPlayer(turn=t1)
             Player2 = AIPlayer(turn=t2)
             return StartGame(players=[Player1, Player2])
+        elif self.menu_dict[msg.content] == ["set_hist_on_quit"]:
+            if self.opts_dict['print_hist_on_quit'] == 'True':
+                self.opts_dict['print_hist_on_quit'] = 'False'
+            else:
+                self.opts_dict['print_hist_on_quit'] = 'True'
+            self.save_opts()
+            return RenderMenu(content=self.menu_state, menu_dict=self.menu_dict, prev_menu=self.menu_state)
         elif self.menu_dict[msg.content] == ["not_implemented"]:
             return RenderMenu(content=self.menu_state, menu_dict=self.menu_dict, prev_menu=self.menu_state)
 

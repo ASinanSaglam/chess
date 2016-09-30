@@ -6,7 +6,7 @@ from InputReader import InputReader
 from GameState import GameState
 from Referee import CRef
 from msgs import InitGame
-from blessings import Terminal
+#from blessings import Terminal
 
 class GameInit(object):
     def __init__(self):

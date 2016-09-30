@@ -23,16 +23,12 @@ class InputParser(BaseModule):
               6: "K", -1: "o", -2: "n", 
               -3: "b", -4: "r", -5: "q",
               -6: "k" }
-        self.menu_dict = {"main menu": ["new game","load game","settings","exit game"],
-                          "new game": ["single player", "local multi player"],
-                          "load game": ["not_implemented"], 
-                          "settings": ["not_implemented"], 
-                          "exit game": ["quit_game"], 
-                          "single player": ["new_single"], 
-                          "local multi player": ["new_lmulti"]}
+        self.menu_dict = None
 
     def processInput(self, msg):
         inp_str = msg.content
+        if not self.menu_dict:
+            self.menu_dict = self.att_modules["MainBus"].att_modules["GameState"].menu_dict
         # Let's first confirm that it's an actual move
         if self.in_game:
             try:

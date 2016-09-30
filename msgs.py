@@ -10,6 +10,15 @@ class NullMsg(BaseMsg):
         self.mtype = mtype
         self.player = player
 
+class PrintHistory(BaseMsg):
+    '''
+    Prints history up to that point
+    '''
+    def __init__(self, content=None, mtype='PRINT_HISTORY', tmodule="Board"):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+
 class ReadInput(BaseMsg):
     '''
     This is the msg from the input reader, passing the input entered by the player

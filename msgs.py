@@ -14,10 +14,21 @@ class PrintHistory(BaseMsg):
     '''
     Prints history up to that point
     '''
-    def __init__(self, content=None, mtype='PRINT_HISTORY', tmodule="Board"):
+    def __init__(self, content=None, mtype='PRINT_HISTORY', tmodule="Board", hist=None):
         self.content = content
         self.mtype = mtype
         self.tmodule = tmodule
+        self.hist = hist
+
+class RenderHistory(BaseMsg):
+    '''
+    Render history msg to be passed to display driver
+    '''
+    def __init__(self, content=None, mtype='RENDER_HISTORY', tmodule="Display", hist=None):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+        self.hist = hist
 
 class SetOptions(BaseMsg):
     '''

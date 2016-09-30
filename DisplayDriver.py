@@ -4,7 +4,7 @@
 import numpy as np
 
 from base_modules import BaseModule
-from msgs import ReadingStatus, QuitGame, GotoMenu
+from msgs import ReadingStatus, QuitGame, GotoMenu, DisplayBoard
 
 class DisplayDriver(BaseModule):
     def __init__(self, term=None):
@@ -24,6 +24,8 @@ class DisplayDriver(BaseModule):
         elif "RENDER_MENU" in msg.mtype:
             self.menu_display(msg)
             self.send_to_bus(ReadingStatus(content="COMMAND"))
+        elif msg.mtype == "RENDER_HISTORY":
+            self.displayHistory(msg)
         else:
             pass
 
@@ -90,6 +92,29 @@ class DisplayDriver(BaseModule):
                 print("# {0}".format(elem))
         print("###################################")        
         print("Please enter a command:")
+
+    def displayHistory(self, msg):
+        if self.term:
+            self._displayHistTerm(msg.hist)
+        else:
+            self._displayHistNoTerm(msg.hist)
+
+    def _displayHistTerm(self, hist):
+        print(self.term.clear())
+        h, w = self.term.height, self.term.width
+        print(self.term.move(h/2-(h/4), 0) + "{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
+        print("{0:{fill}{align}{width}}".format(" Game History ", fill="#", align="^", width=w) )
+        print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
+        print(", ".join(hist))
+        print("Final board position: ")
+        self.send_now(DisplayBoard())
+
+    def _displayHistNoTerm(self, hist):
+        print("Game history: ")
+        print(", ".join(hist))
+        print("Final board position: ")
+        self.send_now(DisplayBoard())
+
 
 class BoardDisplay(BaseModule):
     def __init__(self, driver=None):

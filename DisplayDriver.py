@@ -57,7 +57,12 @@ class DisplayDriver(BaseModule):
         print("")
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
         for elem in menu_content:
-            print("{0:{fill}{align}{width}}".format(" "+elem+" ", fill="#", align="^", width=w) )
+            if menu_name == 'settings':
+                opts = self.att_modules['MainBus'].att_modules['GameState'].opts_dict
+                set_keys = self.att_modules['MainBus'].att_modules['GameState'].setting_dict
+                print("{0:{fill}{align}{width}}".format(" "+elem+": "+opts[set_keys[elem]]+" ", fill="#", align="^", width=w) )
+            else:
+                print("{0:{fill}{align}{width}}".format(" "+elem+" ", fill="#", align="^", width=w) )
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
         print("Please enter a command:")
 
@@ -77,7 +82,12 @@ class DisplayDriver(BaseModule):
         print("## Type to navigate menus #########")        
         print("###################################")        
         for elem in menu_content:
-            print("# {0}".format(elem))
+            if menu_name == 'settings':
+                opts = self.att_modules['MainBus'].att_modules['GameState'].opts_dict
+                set_keys = self.att_modules['MainBus'].att_modules['GameState'].setting_dict
+                print("# {0}".format(elem) + ": " + opts[set_keys[elem]]+ " ")
+            else:
+                print("# {0}".format(elem))
         print("###################################")        
         print("Please enter a command:")
 

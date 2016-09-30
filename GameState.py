@@ -1,7 +1,7 @@
 from base_modules import BaseModule
 from Players import HumanPlayer, AIPlayer
 from msgs import ReadingStatus, RenderMenu, InvalidCommand, DisplayBoard, StartGame, \
-                 PrintHistory, NullMsg
+                 PrintHistory, SetOptions
 
 class GameState(BaseModule):
     def __init__(self):
@@ -15,12 +15,19 @@ class GameState(BaseModule):
         self.menu_dict = {"main menu": ["new game","load game","settings","exit game"],
                           "new game": ["single player", "local multi player"],
                           "load game": ["not_implemented"], 
-                          "settings": ["set AI", "show hist"],
-                          "set AI": ["not_implemented"], 
+                          "settings": ["set AI type", "set AI diff", "show hist", "bless term"],
+                          "set AI type": ["not_implemented"], 
+                          "set AI diff": ["not_implemented"], 
                           "show hist": ["set_hist_on_quit"], 
+                          "bless term": ["set_blessing"], 
                           "exit game": ["quit_game"], 
                           "single player": ["new_single"], 
                           "local multi player": ["new_lmulti"]}
+
+        self.setting_dict = {"set AI type": "ai_type",
+                             "set AI diff": "ai_diff",
+                             "show hist": "print_hist_on_quit",
+                             "bless term": "blessed_term"}
 
     def load_opts(self, filename='.cmasher_opts.yaml'):
         import os, yaml
@@ -29,10 +36,12 @@ class GameState(BaseModule):
             self.opts_dict = yaml.load(opts)
         else:
             # Defaults here
-            self.opts_dict = {'ai_diff': 1,
+            self.opts_dict = {'ai_diff': '1',
                          'ai_type': 'random',
-                         'print_hist_on_quit': 'True'}
+                         'print_hist_on_quit': 'True', 
+                         'blessed_term': 'True'}
             self.save_opts()
+        #self.send_to_bus(SetOptions(content=self.opts_dict))
 
 
     def save_opts(self, filename='.cmasher_opts.yaml'):
@@ -41,6 +50,7 @@ class GameState(BaseModule):
             os.remove(filename)
         with open(filename, 'w') as ofile:
             yaml.dump(self.opts_dict, ofile, default_flow_style=True)
+        #self.send_to_bus(SetOptions(content=self.opts_dict))
         
     def handle_msg(self, msg):
         # Handle quitting
@@ -62,6 +72,8 @@ class GameState(BaseModule):
             msg.player.read_input()
         # Handle menus
         elif msg.mtype == "GOTO_MENU":
+            print("received")
+            print(msg.content)
             MM = self.set_menu(msg)
             self.send_to_bus(MM)
         elif msg.mtype == "START_GAME":
@@ -97,11 +109,10 @@ class GameState(BaseModule):
             Player2 = AIPlayer(turn=t2)
             return StartGame(players=[Player1, Player2])
         elif self.menu_dict[msg.content] == ["set_hist_on_quit"]:
-            if self.opts_dict['print_hist_on_quit'] == 'True':
-                self.opts_dict['print_hist_on_quit'] = 'False'
-            else:
-                self.opts_dict['print_hist_on_quit'] = 'True'
-            self.save_opts()
+            self.switch_option('print_hist_on_quit')
+            return RenderMenu(content=self.menu_state, menu_dict=self.menu_dict, prev_menu=self.menu_state)
+        elif self.menu_dict[msg.content] == ["set_blessing"]:
+            self.switch_option('blessed_term')
             return RenderMenu(content=self.menu_state, menu_dict=self.menu_dict, prev_menu=self.menu_state)
         elif self.menu_dict[msg.content] == ["not_implemented"]:
             return RenderMenu(content=self.menu_state, menu_dict=self.menu_dict, prev_menu=self.menu_state)
@@ -111,6 +122,17 @@ class GameState(BaseModule):
             self.menu_state = msg.content
         # Now we can handle the rendering
         return RenderMenu(content=self.menu_state, menu_dict=self.menu_dict, prev_menu=self.prev_menu)
+
+    def switch_option(self, option):
+        try:
+            val = self.opts_dict[option] 
+            if self.opts_dict[option] == 'True':
+                self.opts_dict[option] = 'False'
+            else:
+               self.opts_dict[option] = 'True'
+        except:
+            self.opts_dict[option] = 'True'
+        self.save_opts()
 
     def add_player(self, player):
         self.players.append(add_player)

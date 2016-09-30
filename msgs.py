@@ -19,6 +19,15 @@ class PrintHistory(BaseMsg):
         self.mtype = mtype
         self.tmodule = tmodule
 
+class SetOptions(BaseMsg):
+    '''
+    Setter of options that is sent out after an options change
+    '''
+    def __init__(self, content=None, mtype='SET_OPTIONS', tmodule="Board"):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+
 class ReadInput(BaseMsg):
     '''
     This is the msg from the input reader, passing the input entered by the player

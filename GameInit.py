@@ -6,17 +6,13 @@ from InputReader import InputReader
 from GameState import GameState
 from Referee import CRef
 from msgs import InitGame
-#from blessings import Terminal
+import sys
 
 class GameInit(object):
     def __init__(self):
         self.MB = MainBus()
         self.GState = GameState()
-        try:
-            t = Terminal()
-            self.DDisp = DisplayDriver(term=t)
-        except:
-            self.DDisp = DisplayDriver()
+        self.DDisp = DisplayDriver()
         self.IParse = InputParser()
         self.Inp = InputReader()
         self.CB = CBoard()
@@ -29,25 +25,43 @@ class GameInit(object):
         self.MB.connect_module(self.Ref)
 
     def run(self):
-        # Temporarily just start a game
+        import os, yaml
+        term_opt = 'True'
+        filename = '.cmasher_opts.yaml'
+        if os.path.isfile(filename):
+            opts_f = open('.cmasher_opts.yaml', 'r')
+            opts = yaml.load(opts_f)
+            try:
+                if not (opts['blessed_term'] == 'True'):
+                    term_opt = 'False'
+            except: 
+                pass
+
+        if term_opt == 'True':
+            try:
+                from blessings import Terminal
+                t = Terminal()
+                self.MB.msg_q.append(InitGame())
+                self.DDisp.term = t
+                with self.DDisp.term.fullscreen():
+                    while self.GState.running:
+                        self.MB.run()
+                        self.Inp.run()
+                        self.IParse.run()
+                        self.Ref.run()
+                        self.CB.run()
+                        self.DDisp.run()
+                        self.GState.run()
+                sys.exit()
+            except:
+                pass
         self.MB.msg_q.append(InitGame())
-        #self.init_new_game()
-        if self.DDisp.term:
-            with self.DDisp.term.fullscreen():
-                while self.GState.running:
-                    self.MB.run()
-                    self.Inp.run()
-                    self.IParse.run()
-                    self.Ref.run()
-                    self.CB.run()
-                    self.DDisp.run()
-                    self.GState.run()
-        else:
-            while self.GState.running:
-                self.MB.run()
-                self.Inp.run()
-                self.IParse.run()
-                self.Ref.run()
-                self.CB.run()
-                self.DDisp.run()
-                self.GState.run()
+        while self.GState.running:
+            self.MB.run()
+            self.Inp.run()
+            self.IParse.run()
+            self.Ref.run()
+            self.CB.run()
+            self.DDisp.run()
+            self.GState.run()
+        sys.exit()

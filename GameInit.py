@@ -6,7 +6,6 @@ from InputReader import InputReader
 from GameState import GameState
 from Referee import CRef
 from msgs import InitGame
-import sys
 
 class GameInit(object):
     def __init__(self):
@@ -25,7 +24,7 @@ class GameInit(object):
         self.MB.connect_module(self.Ref)
 
     def run(self):
-        import os, yaml
+        import os, yaml, sys
         term_opt = 'True'
         filename = '.cmasher_opts.yaml'
         if os.path.isfile(filename):
@@ -52,9 +51,15 @@ class GameInit(object):
                         self.CB.run()
                         self.DDisp.run()
                         self.GState.run()
+                    sys.exit()
                 sys.exit()
             except:
-                pass
+                self.run_without_term()
+        else:
+            self.run_without_term()
+
+    def run_without_term(self):
+        import sys
         self.MB.msg_q.append(InitGame())
         while self.GState.running:
             self.MB.run()

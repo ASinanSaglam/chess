@@ -98,6 +98,7 @@ class DisplayDriver(BaseModule):
             self._displayHistTerm(msg.hist)
         else:
             self._displayHistNoTerm(msg.hist)
+        self.send_to_bus(QuitGame())
 
     def _displayHistTerm(self, hist):
         print(self.term.clear())
@@ -113,7 +114,7 @@ class DisplayDriver(BaseModule):
         print("Game history: ")
         print(", ".join(hist))
         print("Final board position: ")
-        self.send_now(DisplayBoard())
+        #self.send_now(DisplayBoard())
 
 
 class BoardDisplay(BaseModule):

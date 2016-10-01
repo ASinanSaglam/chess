@@ -66,7 +66,6 @@ class DisplayDriver(BaseModule):
             else:
                 print("{0:{fill}{align}{width}}".format(" "+elem+" ", fill="#", align="^", width=w) )
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
-        print("Please enter a command:")
 
     def _menu_display_noterm(self, msg):
         menu_name = msg.content
@@ -91,7 +90,6 @@ class DisplayDriver(BaseModule):
             else:
                 print("# {0}".format(elem))
         print("###################################")        
-        print("Please enter a command:")
 
     def displayHistory(self, msg):
         if self.term:
@@ -114,7 +112,7 @@ class DisplayDriver(BaseModule):
         print("Game history: ")
         print(", ".join(hist))
         print("Final board position: ")
-        #self.send_now(DisplayBoard())
+        self.send_now(DisplayBoard())
 
 
 class BoardDisplay(BaseModule):
@@ -213,7 +211,6 @@ class BoardDisplay(BaseModule):
         print( "     {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  "\
                      .format(*['A','B','C','D','E','F','G','H',]))
         print("###################################")        
-        print("Please enter a move:")
 
     def _printBoardTerm(self):
         """
@@ -245,4 +242,3 @@ class BoardDisplay(BaseModule):
                      .format(*['A','B','C','D','E','F','G','H',]), align="^", width=w))
         print("")
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
-        print("Please enter a move:")

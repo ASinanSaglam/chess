@@ -105,14 +105,10 @@ class DisplayDriver(BaseModule):
         print("{0:{fill}{align}{width}}".format(" Game History ", fill="#", align="^", width=w) )
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
         print(", ".join(hist))
-        print("Final board position: ")
-        self.send_now(DisplayBoard())
 
     def _displayHistNoTerm(self, hist):
         print("Game history: ")
         print(", ".join(hist))
-        print("Final board position: ")
-        self.send_now(DisplayBoard())
 
 
 class BoardDisplay(BaseModule):

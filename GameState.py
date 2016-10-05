@@ -57,8 +57,10 @@ class GameState(BaseModule):
         if msg.mtype == "QUIT_GAME":
             print("Quitting game!")
             self.save_opts()
-            if self.opts_dict['print_hist_on_quit'] == 'True' and self.in_game:
-                self.send_now(PrintHistory())
+            #print("Final board position: ")
+            #self.send_now(DisplayBoard())
+            #if self.opts_dict['print_hist_on_quit'] == 'True' and self.in_game:
+            #    self.send_now(PrintHistory())
             self.running = False
         # Handle invalid stuff
         elif msg.mtype == "INVALID_COMMAND":

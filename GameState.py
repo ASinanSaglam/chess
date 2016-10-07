@@ -134,13 +134,13 @@ class GameState(BaseModule):
 
     def switch_option(self, option):
         try:
-            val = self.opts_dict[option] 
-            if self.opts_dict[option] == 'True':
-                self.opts_dict[option] = 'False'
+            val = self.Menus.opts_dict[option] 
+            if self.Menus.opts_dict[option] == 'True':
+                self.Menus.opts_dict[option] = 'False'
             else:
-               self.opts_dict[option] = 'True'
+               self.Menus.opts_dict[option] = 'True'
         except:
-            self.opts_dict[option] = 'True'
+            self.Menus.opts_dict[option] = 'True'
         self.save_opts()
 
     def add_player(self, player):

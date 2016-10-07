@@ -12,6 +12,7 @@ class InputParser(BaseModule):
 
     ## sof Module level
     def handle_msg(self, msg):
+        self.try_update_menu(msg)
         if msg.mtype == "READ_INPUT":
             self.processInput(msg)
         else:
@@ -26,6 +27,13 @@ class InputParser(BaseModule):
             MM = self.parseCommand(msg)
         self.send_to_bus(MM)
         return
+
+    def try_update_menu(self, msg):
+        try:
+            if msg.Menus:
+                self.Menus = msg.Menus
+        except:
+            pass
     ## eof Msg level
 
     ## sof Lower level
@@ -33,6 +41,8 @@ class InputParser(BaseModule):
         cmd = msg.content
         if cmd.lower() == "exit" or cmd.lower() =="quit":
             MM = QuitGame()
+        elif cmd.lower() == "back":
+            MM = GotoMenu(content=self.Menus.prev_menu)
         else:
             try:
                 self.Menus.menu_dict[cmd]

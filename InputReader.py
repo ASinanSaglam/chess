@@ -61,7 +61,7 @@ class InputReader(BaseModule):
     def input_loop(self, inp, comp_check=True, comp_keys=None):
         if comp_check and comp_keys:
             mkeys = copy(comp_keys)
-            mkeys += ['exit', 'quit']
+            mkeys += ['exit', 'quit', 'back']
             self.mkeys = mkeys 
             self.Completer = Completer(mkeys)
             self.rl.set_completer(self.Completer.complete)
@@ -87,7 +87,7 @@ class InputReader(BaseModule):
         menu = Menus()
         self.Menus = menu
         mkeys = copy(menu.menu_dict[menu.menu_state])
-        mkeys += ['exit', 'quit']
+        mkeys += ['exit', 'quit', 'back']
         self.mkeys = mkeys
         self.Completer = Completer(mkeys)
         rl.set_completer(self.Completer.complete)

@@ -21,7 +21,7 @@ class Menus(object):
         self.opts_dict = None
 
     def goto_menu(self, menu_str):
-        if menu_str in self.menu_choices:
+        if (menu_str in self.menu_choices) or (menu_str == self.prev_menu):
             self.prev_menu = self.menu_state
             self.menu_state = menu_str
             self.menu_choices = self.menu_dict[menu_str]

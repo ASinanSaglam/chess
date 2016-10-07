@@ -26,13 +26,44 @@ class GameInit(object):
         self.MB.connect_module(self.DDisp)
 
     def run(self):
+        import os, yaml, sys
+        term_opt = 'True'
+        filename = '.cmasher_opts.yaml'
+        if os.path.isfile(filename):
+            opts_f = open('.cmasher_opts.yaml', 'r')
+            opts = yaml.load(opts_f)
+            try:
+                if not (opts['blessed_term'] == 'True'):
+                    term_opt = 'False'
+            except: 
+                pass
+
+        if term_opt == 'True':
+            try:
+                from blessings import Terminal
+                t = Terminal()
+                self.MB.msg_q.append(InitGame())
+                self.DDisp.term = t
+                with self.DDisp.term.fullscreen():
+                    while self.GState.running:
+                        self.MB.run()
+                        self.Inp.run()
+                        self.IParse.run()
+                        self.Ref.run()
+                        self.BHandler.run()
+                        self.GState.run()
+                        self.DDisp.run()
+                    sys.exit()
+                sys.exit()
+            except:
+                self.run_without_term()
+        else:
+            self.run_without_term()
+
+    def run_without_term(self):
         import sys
-        from blessings import Terminal
-        t = Terminal()
         self.MB.msg_q.append(InitGame())
-        self.DDisp.term = t
-        with self.DDisp.term.fullscreen():
-            while self.GState.running:
+        while self.GState.running:
                 self.MB.run()
                 self.Inp.run()
                 self.IParse.run()
@@ -40,4 +71,4 @@ class GameInit(object):
                 self.BHandler.run()
                 self.GState.run()
                 self.DDisp.run()
-            sys.exit()
+        sys.exit()

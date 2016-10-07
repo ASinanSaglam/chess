@@ -70,8 +70,8 @@ class DisplayDriver(BaseModule):
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
         for elem in menu_content:
             if menu_name == 'settings':
-                opts = self.att_modules['MainBus'].att_modules['GameState'].opts_dict
-                set_keys = self.att_modules['MainBus'].att_modules['GameState'].setting_dict
+                opts = msg.Menus.opts_dict
+                set_keys = msg.Menus.setting_dict
                 print("{0:{fill}{align}{width}}".format(" "+elem+": "+opts[set_keys[elem]]+" ", fill="#", align="^", width=w) )
             else:
                 print("{0:{fill}{align}{width}}".format(" "+elem+" ", fill="#", align="^", width=w) )

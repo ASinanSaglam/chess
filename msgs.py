@@ -156,11 +156,12 @@ class ShowHistory(BaseMsg):
 class RenderBoard(BaseMsg):
     '''
     '''
-    def __init__(self, content=None, mtype='RENDER_BOARD', tmodule="DisplayDriver", board=None):
+    def __init__(self, content=None, mtype='RENDER_BOARD', tmodule="DisplayDriver", board=None, player=None):
         self.content = content
         self.mtype = mtype
         self.tmodule = tmodule
         self.board = board
+        self.player = player
 
 class RenderHistory(BaseMsg):
     '''

@@ -1,6 +1,7 @@
 from base_modules import BaseModule
 from msgs import ReadInput
 from Menus import Menus
+from copy import copy
 
 class Completer(object):
     def __init__(self, opts):
@@ -59,15 +60,16 @@ class InputReader(BaseModule):
     ## sof Lower level
     def input_loop(self, inp, comp_check=True, comp_keys=None):
         if comp_check and comp_keys:
-            mkeys = comp_keys
+            mkeys = copy(comp_keys)
             mkeys += ['exit', 'quit']
+            self.mkeys = mkeys 
             self.Completer = Completer(mkeys)
             self.rl.set_completer(self.Completer.complete)
         print("Please enter a %s:"%inp)
         if comp_check:
             while True:
                 line = raw_input('$ ')
-                if line in comp_keys:
+                if line in mkeys or line in self.mkeys:
                     break
                 print('Incorrect input: %s'%line)
         else:
@@ -84,7 +86,7 @@ class InputReader(BaseModule):
         # We need to setup tab completion
         menu = Menus()
         self.Menus = menu
-        mkeys = menu.menu_dict[menu.menu_state]
+        mkeys = copy(menu.menu_dict[menu.menu_state])
         mkeys += ['exit', 'quit']
         self.mkeys = mkeys
         self.Completer = Completer(mkeys)

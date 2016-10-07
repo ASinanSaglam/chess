@@ -44,7 +44,7 @@ class InputReader(BaseModule):
         if msg.inptype == "MOVE" and msg.player:
             inp = self.input_loop("move", comp_check=False)
             inp = self.clean_inp(inp)
-            IM = ReadInput(content=inp, inptype=msg.inptype, player=self.reading_for)
+            IM = ReadInput(content=inp, inptype=msg.inptype, player=msg.player)
             self.reading = False
             self.send_to_bus(IM)
         elif msg.inptype == "COMMAND":

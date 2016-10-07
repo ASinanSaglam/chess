@@ -62,7 +62,7 @@ class InputParser(BaseModule):
         else:
             try:
                 # Now we test for a move
-                pMove = MoveParser.str_to_move(cmd)
+                pMove = self.MParser.str_to_move(cmd)
                 MM = ParsedMove(content=pMove, raw_text=cmd, player=msg.player)
             except:
                 # if all else fails it's wrong

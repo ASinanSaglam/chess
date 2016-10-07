@@ -40,6 +40,7 @@ class MoveParser(object):
         return mstr
 
     def str_to_move(self, mstr):
+        print("Got string: %s"%mstr)
         move = (self.sq_to_ind[mstr[0:2]], self.sq_to_ind[mstr[2:4]])
         return move 
         

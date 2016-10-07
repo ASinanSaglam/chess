@@ -14,6 +14,7 @@ class BaseModule(object):
     '''
     def __init__(self):
         self.msg_q = []
+        self.msg_q_n = []
         self.att_modules = {}
         self.msg_types = {}
         self.msg_history = []
@@ -47,11 +48,23 @@ class BaseModule(object):
         #print("me: %s"%self.name)
         #print("Processing queue")
         #print(self.msg_q)
+        if len(self.msg_q_n) > 0:
+            self.msg_q = self.msg_q_n + self.msg_q
+        self.msg_q_n = []
         while len(self.msg_q) > 0:
             curr_msg = self.msg_q.pop(0)
+            self.handle_msg(curr_msg)
             #print("current_msg")
             #print(curr_msg.content)
-            self.handle_msg(curr_msg)
+            #try:
+            #    print("handling")
+            #    print(curr_msg)
+            #    print("by:")
+            #    print(self)
+            #    self.handle_msg(curr_msg)
+            #except:
+            #    print("couldn't handle msg")
+            #    self.msg_q_n.append(curr_msg)
             #print("after handling")
             #print(self.msg_q)
 

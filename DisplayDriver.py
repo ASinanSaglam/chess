@@ -4,15 +4,16 @@
 import numpy as np
 
 from base_modules import BaseModule
-from msgs import ReadingStatus, QuitGame, GotoMenu, DisplayBoard
+from msgs import GetInput, QuitGame, GotoMenu, ShowBoard
 
 class DisplayDriver(BaseModule):
     def __init__(self, term=None):
         super(DisplayDriver, self).__init__()
-        self.name = "Display"
+        self.name = "DisplayDriver"
         self.BD = BoardDisplay(driver=self)
         self.term = term
 
+    ## sof Module level
     def handle_msg(self, msg):
         # Pass moves to board displayer
         if msg.mtype == "PROCESSED_MOVE":
@@ -23,25 +24,34 @@ class DisplayDriver(BaseModule):
             msg.player.read_input()
         elif "RENDER_MENU" in msg.mtype:
             self.menu_display(msg)
-            self.send_to_bus(ReadingStatus(content="COMMAND"))
+            self.send_to_bus(GetInput(inptype="COMMAND", Menus=msg.Menus))
         elif msg.mtype == "RENDER_HISTORY":
-            self.displayHistory(msg)
+            self.render_history(msg)
         else:
             pass
+    ## eof Module level
 
-
+    ## sof Msg level
     def menu_display(self, msg):
         if self.term:
             self._menu_display_term(msg)
         else:
             self._menu_display_noterm(msg)
 
+    def render_history(self, msg):
+        if self.term:
+            self._render_histTerm(msg.hist)
+        else:
+            self._render_histNoTerm(msg.hist)
+        self.send_to_bus(QuitGame())
+    ## eof Msg level
+
+    ## sof Lower level
     def _menu_display_term(self, msg):
-        menu_name = msg.content
-        menu_content = msg.menu_dict[menu_name]
-        menu_prev = msg.prev_menu
+        menu_name = msg.Menus.menu_state
+        menu_content = msg.Menus.menu_choices
         if menu_content[0] == "NOT_IMPLEMENTED":
-            return GotoMenu(content=msg.prev_menu)
+            return GotoMenu(Menus=msg.Menus)
         elif menu_content[0] == "QUIT_GAME":
             return QuitGame()
         # We have blessings, let's improve the view
@@ -68,11 +78,10 @@ class DisplayDriver(BaseModule):
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
 
     def _menu_display_noterm(self, msg):
-        menu_name = msg.content
-        menu_content = msg.menu_dict[menu_name]
-        menu_prev = msg.prev_menu
+        menu_name = msg.Menus.menu_state
+        menu_content = msg.Menus.menu_choices
         if menu_content[0] == "NOT_IMPLEMENTED":
-            return GotoMenu(content=msg.prev_menu)
+            return GotoMenu(content=msg.Menus.prev_menu, Menus=msg.Menus)
         elif menu_content[0] == "QUIT_GAME":
             return QuitGame()
         print("###################################")
@@ -84,19 +93,13 @@ class DisplayDriver(BaseModule):
         print("###################################")        
         for elem in menu_content:
             if menu_name == 'settings':
-                opts = self.att_modules['MainBus'].att_modules['GameState'].opts_dict
-                set_keys = self.att_modules['MainBus'].att_modules['GameState'].setting_dict
+                opts = msg.Menus.opts_dict
+                set_keys = msg.Menus.setting_dict
                 print("# {0}".format(elem) + ": " + opts[set_keys[elem]]+ " ")
             else:
                 print("# {0}".format(elem))
         print("###################################")        
 
-    def displayHistory(self, msg):
-        if self.term:
-            self._displayHistTerm(msg.hist)
-        else:
-            self._displayHistNoTerm(msg.hist)
-        self.send_to_bus(QuitGame())
 
     def _displayHistTerm(self, hist):
         print(self.term.clear())
@@ -109,6 +112,7 @@ class DisplayDriver(BaseModule):
     def _displayHistNoTerm(self, hist):
         print("Game history: ")
         print(", ".join(hist))
+    ## eof Lower level
 
 
 class BoardDisplay(BaseModule):

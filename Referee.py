@@ -3,34 +3,36 @@
 # Contact: vsural@gmail.com, asinansaglam@gmail.com
 # Created on Sat Jun 13 23:53:13 2015
 
-import numpy as np
 from base_modules import BaseModule 
-from msgs import ValidMove, InvalidMove
+from MoveParser import MoveParser
+#from msgs import ValidMove, InvalidMove
  
-class CRef(BaseModule):
+class Referee(BaseModule):
     """
     A referee class for the chess engine. 
     This class checks the validity of moves and handles
     move generation for any purpose
     """
     def __init__(self):
-        super(CRef,self).__init__()
+        super(Referee,self).__init__()
         self.name = "Referee"
-        self.N = np.array([1,0])
-        self.S = np.array([-1,0])
-        self.E = np.array([0,1])
-        self.W = np.array([0,-1])
+        self.MParser = MoveParser()
 
-    def get_board_state(self):
-        # ensure we have the board
-        self.board_obj = self.att_modules["MainBus"].get_module("Board")
-        self.turn = self.board_obj.turn
-        self.pieceDict = self.board_obj.pieceDict
+    # Module level
+    def handle_msg(self, msg):
+        if msg.mtype == "PARSED_MOVE":
+            self.validateInput(msg)
+        elif msg.mtype == "GAME_STARTED":
+            self.board = msg.board
+        elif msg.mtype == "PROCESSED_MOVE":
+            self.board = msg.board
+        else:
+            pass
+    # eof Module level
 
+    # sof Msg level
     def validateInput(self, msg):
-        self.get_board_state()
         inp_move = msg.content
-        inp_str = self.board_obj.move_to_str(inp_move)
         # Re-writing this section with a different logic
         moves, move_strs = self.gen_moves()
         # Let's test 
@@ -45,24 +47,20 @@ class CRef(BaseModule):
             PM = ValidMove(content=inp_move)
         else:
             PM = InvalidMove(content=True, player=msg.player)
-        return PM
+        self.send_to_bus(PM)
+    # eof Msg level
 
+    # sof Lower level
     def gen_moves(self):
         self.get_board_state()
         # turn checking
-        N, S, E, W = self.N, self.S, self.E, self.W
+        N, S, E, W = self.MParser.N, self.MParser.S, self.MParser.E, self.MParser.W
         if not self.turn:
             pieces = [1,2,3,4,5,6]
             epieces = [-1,-2,-3,-4,-5,-6]
-            directions = {1:[N, N+N, N+E, N+W], 2:[N+N+E, N+N+W, S+S+E, S+S+W, E+E+N, E+E+S, W+W+N, W+W+S], 
-                          3:[N+E, N+W, S+E, S+W], 4:[N,S,E,W], 5:[N,S,E,W,N+E,N+W,S+E,S+W], 
-                          6:[N,S,E,W,N+E,N+W,S+E,S+W]}
         else:
             pieces = [-1,-2,-3,-4,-5,-6]
             epieces = [1,2,3,4,5,6]
-            directions = {-1:[S, S+S, S+E, S+W], -2:[N+N+E, N+N+W, S+S+E, S+S+W, E+E+N, E+E+S, W+W+N, W+W+S], 
-                          -3:[N+E, N+W, S+E, S+W], -4:[N,S,E,W], -5:[N,S,E,W,N+E,N+W,S+E,S+W], 
-                          -6:[N,S,E,W,N+E,N+W,S+E,S+W]}
         # Pieces are the keys to the pieceDict that we want to 
         # generate moves for
         moves = []
@@ -127,10 +125,4 @@ class CRef(BaseModule):
                                 move_strs.append(self.board_obj.move_to_str(np.array([pos,npos])))
         return np.array(moves), move_strs
 
-    def handle_msg(self, msg):
-        if msg.mtype == "PARSED_MOVE":
-            PM = self.validateInput(msg)
-            PM.raw_text = msg.raw_text
-            self.send_to_bus(PM)
-        else:
-            pass
+    # eof Lower level    

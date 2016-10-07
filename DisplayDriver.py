@@ -166,8 +166,9 @@ class BoardDisplay(BaseModule):
             print("#####   Blacks turn to play   #####")
         self._printBoardNoTerm()
 
-    def _displayMoveTerm(self,content):
-        self.board, turn = content
+    def _displayMoveTerm(self,msg):
+        self.board = msg.board
+        turn = self.get_turn()
 
         t = self.DisplayDriver.term
         h, w = t.height, t.width
@@ -204,18 +205,17 @@ class BoardDisplay(BaseModule):
         board = u"".join(board.split())
         board = map(self.trPiece, board)
         board = u"".join(board)
-        print(board)
         #print("Current Board State")
         print("###################################")        
         print("   --------------------------")
-        print( u" 8 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[0:9])) 
-        print( u" 7 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[9:18])) 
-        print( u" 6 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[19:29])) 
-        print( u" 5 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[29:39])) 
-        print( u" 4 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[39:49])) 
-        print( u" 3 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[49:59])) 
-        print( u" 2 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[59:69])) 
-        print( u" 1 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[69:79])) 
+        print( u" 8 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[0:8])) 
+        print( u" 7 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[8:16])) 
+        print( u" 6 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[16:24])) 
+        print( u" 5 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[24:32])) 
+        print( u" 4 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[32:40])) 
+        print( u" 3 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[40:48])) 
+        print( u" 2 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[48:56])) 
+        print( u" 1 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[56:64])) 
         print("   --------------------------")
         print( "     {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  "\
                      .format(*['A','B','C','D','E','F','G','H',]))
@@ -234,18 +234,20 @@ class BoardDisplay(BaseModule):
         t = self.DisplayDriver.term
         h, w = t.height, t.width
 
-        flatBoard = np.array(map(self.trPiece, self.board.flatten()))
-        strBoard = flatBoard.reshape((8,8))
+        board = self.board[31:109]
+        board = u"".join(board.split())
+        board = map(self.trPiece, board)
+        board = u"".join(board)
         print("")
         print("{0:{align}{width}}".format("   --------------------------", align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 8 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*strBoard[7][::-1]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 7 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*strBoard[6][::-1]), align="^", width=w)) 
-        print(u'{0:{align}{width}}'.format(u" 6 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*strBoard[5][::-1]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 5 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*strBoard[4][::-1]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 4 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*strBoard[3][::-1]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 3 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*strBoard[2][::-1]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 2 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*strBoard[1][::-1]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 1 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*strBoard[0][::-1]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 8 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[0:8]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 7 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[8:16]), align="^", width=w)) 
+        print(u'{0:{align}{width}}'.format(u" 6 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[16:24]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 5 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[24:32]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 4 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[32:40]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 3 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[40:48]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 2 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[48:56]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 1 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[56:64]), align="^", width=w))
         print("{0:{align}{width}}".format("   --------------------------", align="^", width=w))
         print("{0:{align}{width}}".format( "     {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  "\
                      .format(*['A','B','C','D','E','F','G','H',]), align="^", width=w))

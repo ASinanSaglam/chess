@@ -27,17 +27,17 @@ class GameInit(object):
 
     def run(self):
         import sys
-        #from blessings import Terminal
-        #t = Terminal()
+        from blessings import Terminal
+        t = Terminal()
         self.MB.msg_q.append(InitGame())
-        #self.DDisp.term = t
-        #with self.DDisp.term.fullscreen():
-        while self.GState.running:
-            self.MB.run()
-            self.Inp.run()
-            self.IParse.run()
-            self.Ref.run()
-            self.BHandler.run()
-            self.GState.run()
-            self.DDisp.run()
-        sys.exit()
+        self.DDisp.term = t
+        with self.DDisp.term.fullscreen():
+            while self.GState.running:
+                self.MB.run()
+                self.Inp.run()
+                self.IParse.run()
+                self.Ref.run()
+                self.BHandler.run()
+                self.GState.run()
+                self.DDisp.run()
+            sys.exit()

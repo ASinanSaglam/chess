@@ -109,6 +109,8 @@ class DisplayDriver(BaseModule):
         print("{0:{fill}{align}{width}}".format(" Game History ", fill="#", align="^", width=w) )
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
         print(", ".join(hist))
+        print("")
+        raw_input("Press enter to continue!")
 
     def _render_hist_noterm(self, hist):
         print("Game history: ")

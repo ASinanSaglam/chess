@@ -1,6 +1,7 @@
 from base_modules import BaseMsg
 
 # A description of all msgs we have
+# A null msg
 class NullMsg(BaseMsg):
     '''
     Absolutely nothing
@@ -10,58 +11,35 @@ class NullMsg(BaseMsg):
         self.mtype = mtype
         self.player = player
 
-class PrintHistory(BaseMsg):
-    '''
-    Prints history up to that point
-    '''
-    def __init__(self, content=None, mtype='PRINT_HISTORY', tmodule="Board", hist=None):
-        self.content = content
-        self.mtype = mtype
-        self.tmodule = tmodule
-        self.hist = hist
-
-class RenderHistory(BaseMsg):
-    '''
-    Render history msg to be passed to display driver
-    '''
-    def __init__(self, content=None, mtype='RENDER_HISTORY', tmodule="Display", hist=None):
-        self.content = content
-        self.mtype = mtype
-        self.tmodule = tmodule
-        self.hist = hist
-
-class SetOptions(BaseMsg):
-    '''
-    Setter of options that is sent out after an options change
-    '''
-    def __init__(self, content=None, mtype='SET_OPTIONS', tmodule="Board"):
-        self.content = content
-        self.mtype = mtype
-        self.tmodule = tmodule
-
+# Input related messages
 class ReadInput(BaseMsg):
     '''
     This is the msg from the input reader, passing the input entered by the player
     to the main bus. Text is the content 
     '''
-    def __init__(self, content=None, mtype='READ_INPUT', player=None):
+    def __init__(self, content=None, mtype='READ_INPUT', player=None, inptype=None):
         self.content = content
         self.mtype = mtype
         self.player = player
+        self.inptype = inptype 
 
-class ReadCommand(BaseMsg):
+class GetInput(BaseMsg):
     '''
-    Msg that gets sent out from the input parser, if the input is not a move
-    and is a command of invalid input.
+    This is the msg for the input reader, signaling the reader to take input 
+    Inptype is the type of input, player is the object requesting the input
     '''
-    def __init__(self, content=None, mtype='READ_COMMAND'):
+    def __init__(self, content=None, mtype='GET_INPUT', player=None, inptype=None, Menus=None):
         self.content = content
         self.mtype = mtype
+        self.player = player
+        self.inptype = inptype 
+        self.Menus = Menus 
 
+# Move/command related msges
 class ParsedMove(BaseMsg):
     '''
-    Msg from the move parser, returning the move in a way the board/referee will understand.
-    Also returns the original raw text.
+    Msg from the input parser, confirming it's a move. At this stage the board is not 
+    involved
     '''
     def __init__(self, content=None, mtype='PARSED_MOVE', raw_text='', player=None):
         self.content = content
@@ -71,23 +49,36 @@ class ParsedMove(BaseMsg):
 
 class ValidMove(BaseMsg):
     '''
-    Msg from the Referee, this is the move that is validated and ready to be passed
-    to board for processing.
+    Msg from referee, validating a particular move. Content is move, rest is obv
     '''
-    def __init__(self, content=None, mtype='VALID_MOVE', raw_text='', player=None):
+    def __init__(self, content=None, mtype='VALID_MOVE', raw_text='', player=None, board=None):
         self.content = content
         self.raw_text = raw_text
         self.mtype = mtype
         self.player = player
+        self.board = board
 
 class InvalidMove(BaseMsg):
     '''
-    Invalid move command 
+    Invalid move move
     '''
-    def __init__(self, content=None, mtype='INVALID_MOVE', raw_text='', player=None):
+    def __init__(self, content=None, mtype='INVALID_MOVE', raw_text='', player=None, board=None):
         self.content = content
+        self.raw_text = raw_text
         self.mtype = mtype
         self.player = player
+        self.board = board
+
+class ProcessedMove(BaseMsg):
+    '''
+    From board handler, confirming that the move is made on the current board
+    '''
+    def __init__(self, content=None, mtype='PROCESSED_MOVE', raw_text='', player=None, board=None):
+        self.content = content
+        self.raw_text = raw_text
+        self.mtype = mtype
+        self.player = player
+        self.board = board
 
 class InvalidCommand(BaseMsg):
     '''
@@ -99,87 +90,25 @@ class InvalidCommand(BaseMsg):
         self.raw_text = raw_text
         self.player = player
 
+# Game state related msges
 class QuitGame(BaseMsg):
     '''
     Command to quit the game
     '''
-    def __init__(self, content=None, mtype='QUIT_GAME'):
+    def __init__(self, content=None, mtype='QUIT_GAME', tmodule="GameState"):
         self.content = content
         self.mtype = mtype
-
-class ProcessedMove(BaseMsg):
-    '''
-    Msg from the board, indicating a move is processed after validation, also returns the board state
-    in it's content. This is used for rendering the board after making the move. 
-    '''
-    def __init__(self, content=None, mtype='PROCESSED_MOVE', player=None, turn=None):
-        self.content = content
-        self.mtype = mtype
-        self.player = player
-        self.turn = turn
-
-class ReadingStatus(BaseMsg):
-    '''
-    Msg that can be used to turn input reading on and off. True in content indicates that the system
-    is ready to take in input, false indicates otherwise.
-    '''
-    def __init__(self, content=None, mtype='READING_STATUS', player=None):
-        self.content = content
-        self.mtype = mtype
-        self.player = player
-
-class DisplayBoard(BaseMsg):
-    '''
-    Msg that can be used to display the board, it's read by board class to signal the need to show the 
-    board to the player, w/o making a move
-    '''
-    def __init__(self, content=None, mtype='DISPLAY_BOARD', tmodule="Board"):
-        self.content = content
-        self.mtype = mtype
-        self.tmodule = tmodule
-
-class RenderBoard(BaseMsg):
-    '''
-    Msg that can be used to display the board, it's read by board class to signal the need to show the 
-    board to the player, w/o making a move
-    '''
-    def __init__(self, content=None, mtype='RENDER_BOARD', tmodule="Display", player=None):
-        self.content = content
-        self.mtype = mtype
-        self.tmodule = tmodule
-        self.player = player
-
-class RenderMenu(BaseMsg):
-    '''
-    Msg to display the menu. Contains the dictionary of menus and the information about the previous menu 
-    we are coming from, incase we have to return to it
-    '''
-    def __init__(self, content=None, mtype='RENDER_MENU', menu_dict=None, prev_menu=None, tmodule="Display"):
-        self.content = content
-        self.menu_dict = menu_dict
-        self.prev_menu = prev_menu
-        self.mtype = mtype
-        self.tmodule = tmodule
-
-class GotoMenu(BaseMsg):
-    '''
-    Msg to signal GameState to heat to a particular menu
-    '''
-    def __init__(self, content=None, mtype='GOTO_MENU', tmodule="GameState"):
-        self.content = content
-        self.mtype = mtype
-        self.tmodule = tmodule
-
+        
 class StartGame(BaseMsg):
     '''
-    Msg that can be used to display the board, it's read by board class to signal the need to show the 
-    board to the player, w/o making a move
+    Command to quit the game
     '''
-    def __init__(self, content=None, mtype='START_GAME', tmodule="GameState", players=[]):
+    def __init__(self, content=None, mtype='START_GAME', tmodule="GameState", game_type="normal", players=None):
         self.content = content
         self.mtype = mtype
-        self.tmodule = tmodule 
+        self.game_type = game_type 
         self.players = players
+        self.tmodule = tmodule 
 
 class InitGame(BaseMsg):
     '''
@@ -190,3 +119,107 @@ class InitGame(BaseMsg):
         self.content = content
         self.mtype = mtype
         self.tmodule = tmodule
+
+class GameStarted(BaseMsg):
+    '''
+    Signal to all modules that the game started
+    '''
+    def __init__(self, content=None, mtype='GAME_STARTED', tmodule=None, game_type="normal", players=None, board=None):
+        self.content = content
+        self.mtype = mtype
+        self.game_type = game_type 
+        self.players = players
+        self.tmodule = tmodule 
+        self.board = board
+
+class GotoMenu(BaseMsg):
+    '''
+    Msg to signal GameState to head to a particular menu
+    '''
+    def __init__(self, content=None, mtype='GOTO_MENU', tmodule="GameState", Menus=None):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+        self.Menus = Menus
+
+# Msges to board handler
+class ShowBoard(BaseMsg):
+    '''
+    Msg that can be used to display the board, it's read by board class to signal the need to show the 
+    board to the player, w/o making a move
+    '''
+    def __init__(self, content=None, mtype='SHOW_BOARD', tmodule="BoardHandler"):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+
+class ShowHistory(BaseMsg):
+    '''
+    Msg that can be used to display the history, it's read by board handler class to signal the need to show the 
+    history to the player
+    '''
+    def __init__(self, content=None, mtype='SHOW_HISTORY', tmodule="BoardHandler"):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+
+class ShowBoardNow(BaseMsg):
+    '''
+    Msg that can be used to display the board, it's read by board class to signal the need to show the 
+    board to the player, w/o making a move
+    '''
+    def __init__(self, content=None, mtype='SHOW_BOARD_NOW', tmodule="BoardHandler"):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+
+class ShowHistoryNow(BaseMsg):
+    '''
+    Msg that can be used to display the history, it's read by board handler class to signal the need to show the 
+    history to the player
+    '''
+    def __init__(self, content=None, mtype='SHOW_HISTORY_NOW', tmodule="BoardHandler"):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+
+class CurrentBoard(BaseMsg):
+    '''
+    Board handler msg that shows the current state of the board
+    '''
+    def __init__(self, content=None, mtype='CURRENT_BOARD', board=None):
+        self.content = content
+        self.mtype = mtype
+        self.board = board 
+
+# Msges to display driver
+class RenderBoard(BaseMsg):
+    '''
+    '''
+    def __init__(self, content=None, mtype='RENDER_BOARD', tmodule="DisplayDriver", board=None, player=None):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+        self.board = board
+        self.player = player
+
+class RenderHistory(BaseMsg):
+    '''
+    '''
+    def __init__(self, content=None, mtype='RENDER_HISTORY', tmodule="DisplayDriver", history=None, player=None):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+        self.history = history
+        self.player = player
+
+class RenderMenu(BaseMsg):
+    '''
+    Msg to display the menu. Contains the dictionary of menus and the information about the previous menu 
+    we are coming from, incase we have to return to it
+    '''
+    def __init__(self, content=None, mtype='RENDER_MENU', tmodule="DisplayDriver", Menus=None):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+        self.Menus = Menus

@@ -1,5 +1,5 @@
 from base_modules import BasePlayer
-from msgs import ReadingStatus, ReadInput
+from msgs import GetInput
 
 class HumanPlayer(BasePlayer):
     '''
@@ -11,7 +11,7 @@ class HumanPlayer(BasePlayer):
         self.turn = turn
 
     def read_input(self):
-        self.board.send_to_bus(ReadingStatus(content="MOVE", player=self))
+        self.handler.send_to_bus(GetInput(inptype="MOVE", player=self))
 
 class AIPlayer(BasePlayer):
     '''
@@ -25,9 +25,10 @@ class AIPlayer(BasePlayer):
     def read_input(self):
         from msgs import ValidMove
         import random
-        ref = self.board.att_modules["MainBus"].att_modules["Referee"]
-        moves, move_strs = ref.gen_moves()
+        # This should only be a temporary hack
+        ref = self.handler.att_modules["MainBus"].att_modules["Referee"]
+        moves = ref.gen_moves(ref.board)
         rand_i = random.randint(0, len(moves)-1)
         rand_move = moves[rand_i]
-        rand_str = self.board.move_to_str(rand_move)
-        self.board.send_to_bus(ValidMove(content=rand_move, raw_text=rand_str))
+        self.handler.send_to_bus(ValidMove(content=rand_move, \
+                raw_text=self.handler.MParser.move_to_str(rand_move)))

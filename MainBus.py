@@ -9,7 +9,7 @@ class MainBus(BaseModule):
         super(MainBus, self).__init__()
         self.name = "MainBus"
 
-    #@in_history
+    ##### Module related #####
     def handle_msg(self, msg):
         for module in self.att_modules.iterkeys():
             #print("#########")
@@ -35,3 +35,4 @@ class MainBus(BaseModule):
 
     def get_module(self, module_name):
         return self.att_modules[module_name]
+    ##### end of Module related ######

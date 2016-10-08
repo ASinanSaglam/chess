@@ -180,7 +180,7 @@ class BoardDisplay(BaseModule):
         else:
             self._printBoardNoTerm(board=board)
 
-    def _displayMoveTerm(self,msg):
+    def _displayMoveTerm(self,msg,board=None):
         if not board:
             self.board = msg.board
             turn = self.get_turn()
@@ -199,9 +199,9 @@ class BoardDisplay(BaseModule):
             print("{0:{fill}{align}{width}}".format(" Blacks turn to play ", fill="#", align="^", width=w) )
             print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
         if not board:
-            self._printBoardNoTerm()
+            self._printBoardTerm()
         else:
-            self._printBoardNoTerm(board=board)
+            self._printBoardTerm(board=board)
 
 
     def trPiece(self, piece):

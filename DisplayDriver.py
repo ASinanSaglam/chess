@@ -42,10 +42,9 @@ class DisplayDriver(BaseModule):
 
     def render_history(self, msg):
         if self.term:
-            self._render_histTerm(msg.hist)
+            self._render_hist_term(msg.history)
         else:
-            self._render_histNoTerm(msg.hist)
-        self.send_to_bus(QuitGame())
+            self._render_hist_noterm(msg.history)
     ## eof Msg level
 
     ## sof Lower level
@@ -103,7 +102,7 @@ class DisplayDriver(BaseModule):
         print("###################################")        
 
 
-    def _displayHistTerm(self, hist):
+    def _render_hist_term(self, hist):
         print(self.term.clear())
         h, w = self.term.height, self.term.width
         print(self.term.move(h/2-(h/4), 0) + "{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
@@ -111,7 +110,7 @@ class DisplayDriver(BaseModule):
         print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
         print(", ".join(hist))
 
-    def _displayHistNoTerm(self, hist):
+    def _render_hist_noterm(self, hist):
         print("Game history: ")
         print(", ".join(hist))
     ## eof Lower level

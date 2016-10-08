@@ -1,6 +1,6 @@
 class Menus(object):
     def __init__(self, menu_state="main menu"):
-        self.menu_dict = {"main menu": ["new game","load game","settings","exit game"],
+        self.menu_dict = {"main menu": ["new game","load game","settings"],
                           "new game": ["single player", "local multi player"],
                           "load game": ["not_implemented"], 
                           "settings": ["set AI type", "set AI diff", "show hist", "bless term"],
@@ -8,7 +8,6 @@ class Menus(object):
                           "set AI diff": ["not_implemented"], 
                           "show hist": ["set_hist_on_quit"], 
                           "bless term": ["set_blessing"], 
-                          "exit game": ["quit_game"], 
                           "single player": ["new_single"], 
                           "local multi player": ["new_lmulti"]}
         self.setting_dict = {"set AI type": "ai_type",

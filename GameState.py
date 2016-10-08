@@ -2,7 +2,7 @@ from base_modules import BaseModule
 from Players import HumanPlayer, AIPlayer
 from Menus import Menus
 from msgs import GetInput, RenderMenu, InvalidCommand, ShowBoard, StartGame, \
-                 ShowHistory
+                 ShowHistory, ShowBoardNow, ShowHistoryNow
 # SetOptions
 class GameState(BaseModule):
     def __init__(self):
@@ -39,10 +39,10 @@ class GameState(BaseModule):
     def quit_game(self):
         print("Quitting game!")
         self.save_opts()
-        #print("Final board position: ")
-        #self.send_to_bus(ShowBoard())
-        #if self.opts_dict['print_hist_on_quit'] == 'True' and self.in_game:
-        #    self.send_now(PrintHistory())
+        print("Final board position: ")
+        self.send_now(ShowBoardNow())
+        if self.Menus.opts_dict['print_hist_on_quit'] == 'True' and self.in_game:
+            self.send_now(ShowHistoryNow())
         self.running = False
 
     def invalid_command(self, msg):

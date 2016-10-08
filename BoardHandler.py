@@ -29,13 +29,16 @@ class BoardHandler(BaseModule):
             self.send_to_bus(CurrentBoard(board=self.board))
         elif msg.mtype == "SHOW_BOARD":
             self.showBoard()
+        elif msg.mtype == "SHOW_BOARD_NOW":
+            self.showBoardNow()
         elif msg.mtype == "START_GAME":
             self.initBoard(game_type=msg.game_type)
             self.add_players(msg.players)
             self.send_to_bus(GameStarted(board=self.board, players=self.players))
         elif msg.mtype == "SHOW_HISTORY":
-            self.showBoard()
-            pass
+            self.showHistory()
+        elif msg.mtype == "SHOW_HISTORY_NOW":
+            self.showHistoryNow()
         else:
             pass
     ## eof Module level 
@@ -61,6 +64,14 @@ class BoardHandler(BaseModule):
     def showHistory(self):
         RH = RenderHistory(history=self.inp_history, player=self.in_turn())
         self.send_to_bus(RH)
+
+    def showBoardNow(self):
+        RB = RenderBoard(board=self.board, player=self.in_turn())
+        self.send_now(RB)
+
+    def showHistoryNow(self):
+        RH = RenderHistory(history=self.inp_history, player=self.in_turn())
+        self.send_now(RH)
     ## eof msg level
 
     ## sof Lower level

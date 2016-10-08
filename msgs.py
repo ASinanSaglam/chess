@@ -163,6 +163,26 @@ class ShowHistory(BaseMsg):
         self.mtype = mtype
         self.tmodule = tmodule
 
+class ShowBoardNow(BaseMsg):
+    '''
+    Msg that can be used to display the board, it's read by board class to signal the need to show the 
+    board to the player, w/o making a move
+    '''
+    def __init__(self, content=None, mtype='SHOW_BOARD_NOW', tmodule="BoardHandler"):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+
+class ShowHistoryNow(BaseMsg):
+    '''
+    Msg that can be used to display the history, it's read by board handler class to signal the need to show the 
+    history to the player
+    '''
+    def __init__(self, content=None, mtype='SHOW_HISTORY_NOW', tmodule="BoardHandler"):
+        self.content = content
+        self.mtype = mtype
+        self.tmodule = tmodule
+
 class CurrentBoard(BaseMsg):
     '''
     Board handler msg that shows the current state of the board
@@ -186,11 +206,12 @@ class RenderBoard(BaseMsg):
 class RenderHistory(BaseMsg):
     '''
     '''
-    def __init__(self, content=None, mtype='RENDER_HISTORY', tmodule="DisplayDriver", history=None):
+    def __init__(self, content=None, mtype='RENDER_HISTORY', tmodule="DisplayDriver", history=None, player=None):
         self.content = content
         self.mtype = mtype
         self.tmodule = tmodule
         self.history = history
+        self.player = player
 
 class RenderMenu(BaseMsg):
     '''

@@ -115,7 +115,8 @@ class GameState(BaseModule):
             t1 = random.randint(0,100)%2 
             t2 = (t1+1)%2
             Player1 = HumanPlayer(turn=t1)
-            Player2 = AIPlayer(turn=t2)
+            #Player2 = AIPlayer(turn=t2)
+            Player2 = AIPlayer(turn=t2, aitype='basic')
             return StartGame(players=[Player1, Player2])
         elif self.Menus.menu_dict[msg.content] == ["set_hist_on_quit"]:
             self.switch_option('print_hist_on_quit')

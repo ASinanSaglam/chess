@@ -5,7 +5,8 @@
 
 from base_modules import BaseModule
 from MoveParser import MoveParser
-from msgs import ProcessedMove, RenderBoard, RenderHistory, GameStarted
+from msgs import ProcessedMove, RenderBoard, RenderHistory, GameStarted, \
+                 CurrentBoard
 
 class BoardHandler(BaseModule):
     def __init__(self, board=None):
@@ -25,6 +26,7 @@ class BoardHandler(BaseModule):
         if msg.mtype == "VALID_MOVE":
             self.processMove(msg)
             self.add_move_to_history(msg)
+            self.send_to_bus(CurrentBoard(board=self.board))
         elif msg.mtype == "SHOW_BOARD":
             self.showBoard()
         elif msg.mtype == "START_GAME":
@@ -41,10 +43,14 @@ class BoardHandler(BaseModule):
     ## sof Msg level
     def add_move_to_history(self, msg):
         self.move_history.append(self.board)
-        self.inp_history.append(msg.inp_str)
+        self.inp_history.append(self.MParser.move_to_str(msg.content))
 
     def processMove(self, msg):
-        self.board = self.MParser.movePiece(msg.content, msg.board)
+        if msg.board:
+            board = msg.board
+        else:
+            board = self.board
+        self.board = self.MParser.movePiece(msg.content, board)
         ProM = ProcessedMove(content=msg.content, player=self.in_turn(), board=self.board)
         self.send_to_bus(ProM)
 
@@ -65,7 +71,7 @@ class BoardHandler(BaseModule):
     def add_players(self, players):
         self.players = players
         for player in players:
-            player.board = self
+            player.handler = self
  
     def initBoard(self, game_type="normal"):
         """

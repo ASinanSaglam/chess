@@ -5,7 +5,7 @@
 
 from base_modules import BaseModule 
 from MoveParser import MoveParser
-#from msgs import ValidMove, InvalidMove
+from msgs import ValidMove, InvalidMove
  
 class Referee(BaseModule):
     """
@@ -16,6 +16,7 @@ class Referee(BaseModule):
     def __init__(self):
         super(Referee,self).__init__()
         self.name = "Referee"
+        self.board = None
         self.MParser = MoveParser()
 
     # Module level
@@ -24,8 +25,10 @@ class Referee(BaseModule):
             self.validateInput(msg)
         elif msg.mtype == "GAME_STARTED":
             self.board = msg.board
-        elif msg.mtype == "PROCESSED_MOVE":
+        elif msg.mtype == "CURRENT_BOARD":
             self.board = msg.board
+        #elif msg.mtype == "PROCESSED_MOVE":
+        #    self.board = msg.board
         else:
             pass
     # eof Module level
@@ -34,95 +37,88 @@ class Referee(BaseModule):
     def validateInput(self, msg):
         inp_move = msg.content
         # Re-writing this section with a different logic
-        moves, move_strs = self.gen_moves()
+        moves = self.gen_moves(self.board)
         # Let's test 
-        #driver = self.att_modules['MainBus'].att_modules['Display']
+        #driver = self.att_modules['MainBus'].att_modules['DisplayDriver']
         #for move in moves:
-        #    test_board = self.board_obj.testMove(move)
-        #    driver.BD.displayMove((test_board, self.turn))
+        #    test_board = self.MParser.movePiece(move, self.board)
+        #    driver.BD.displayBoard(board=test_board)
         #    if inp_move in moves:
         #        print("PASSED VALIDITY")
         #
-        if inp_str in move_strs:
-            PM = ValidMove(content=inp_move)
+        if inp_move in moves:
+            PM = ValidMove(content=inp_move, raw_text=self.MParser.move_to_str(inp_move), \
+                           player=msg.player, board=self.board)
         else:
             PM = InvalidMove(content=True, player=msg.player)
         self.send_to_bus(PM)
     # eof Msg level
 
     # sof Lower level
-    def gen_moves(self):
-        self.get_board_state()
+    def gen_moves(self, board):
         # turn checking
+        turn = self.MParser.check_turn(board)
+        # directions
         N, S, E, W = self.MParser.N, self.MParser.S, self.MParser.E, self.MParser.W
-        if not self.turn:
-            pieces = [1,2,3,4,5,6]
-            epieces = [-1,-2,-3,-4,-5,-6]
+        if not turn:
+            pieces = ['p','N','B','R','Q','K']
+            epieces = ['o','n','b','r','q','k']
         else:
-            pieces = [-1,-2,-3,-4,-5,-6]
-            epieces = [1,2,3,4,5,6]
+            epieces = ['p','N','B','R','Q','K']
+            pieces = ['o','n','b','r','q','k']
         # Pieces are the keys to the pieceDict that we want to 
         # generate moves for
         moves = []
-        move_strs = []
-        for i in range(8):
-            for j in range(8):
-                piece = self.board_obj.board[i][j]
-                pos = np.array([i,j])
-                if piece in pieces:
-                    dirs = directions[piece]
-                    for idir in dirs:
-                        # Sort out pawns here
-                        if (piece == pieces[0]):
-                            # OOB checking
-                            npos = pos + np.array(idir)
-                            #print(npos, pos, idir)
-                            if (npos > 7).any() or (npos < 0).any(): continue
-                            npiece = self.board_obj.board[npos[0],npos[1]]
-                            if (idir == dirs[1]).all(): 
-                                if (pos[0] != 1 or pos[0] != 6): 
-                                    move_strs.append(self.board_obj.move_to_str(np.array([pos,npos])))
-                                    continue
+        for pos, ch in enumerate(board):
+            if ch in pieces:
+                dirs = self.MParser.directions[ch.lower()]
+                for idir in dirs:
+                    # Sort out pawns, knights and king here
+                    if (ch.lower() in 'pokn'):
+                        # OOB checking
+                        npos = pos + idir
+                        # landing piece friendly check
+                        npiece = board[npos]
+                        if (npiece == " "): continue
+                        if npiece in pieces: continue
+                        # pawn checks
+                        if ch.lower() in 'po':
+                            # double move check, need to be at the starting pos.
+                            front = board[pos + dirs[0]]
+                            if idir == dirs[0] and (front == "."): moves.append((pos,npos))
+                            if (idir == dirs[1]):
+                                if ch == 'p':
+                                    if ((pos-90) >= 0 and (pos-90) < 10) and (front == "."):
+                                        moves.append((pos,npos))
+                                        continue
+                                if ch == 'o':
+                                    if ((pos-40) >= 0 and (pos-40) < 10) and (front == "."):
+                                        moves.append((pos,npos))
+                                        continue
+                            # check en passant here
                             # if (idir == N+E) or (idir == N+W):
-                            # Landing piece checking
-                            if npiece in pieces: continue
                             # Capture check
-                            if ((idir == dirs[2]).all() or (idir == dirs[3]).all()): 
+                            if (idir == dirs[2]) or (idir == dirs[3]):
                                 if (npiece in epieces):
-                                    moves.append(np.array([pos,npos]))
-                                    move_strs.append(self.board_obj.move_to_str(np.array([pos,npos])))
+                                    moves.append((pos,npos))
                                     continue
                                 continue
-                            moves.append(np.array([pos,npos]))
-                            move_strs.append(self.board_obj.move_to_str(np.array([pos,npos])))
-                        elif (piece == pieces[1]) or (piece == pieces[5]):
-                            # OOB checking
-                            npos = pos + np.array(idir)
-                            if (npos > 7).any() or (npos < 0).any(): continue
-                            npiece = self.board_obj.board[npos[0],npos[1]]
-                            # Landing piece checking
-                            if npiece in pieces: continue
-                            if npiece in epieces: 
-                                moves.append(np.array([pos,npos]))
-                                move_strs.append(self.board_obj.move_to_str(np.array([pos,npos])))
-                                continue
-                            moves.append(np.array([pos,npos]))
-                            move_strs.append(self.board_obj.move_to_str(np.array([pos,npos])))
                         else:
-                        # Every other piece here
-                            for k in range(1,9):
-                                npos = pos + np.array(idir) * k
-                                # OOB checking
-                                if (npos > 7).any() or (npos < 0).any(): break
-                                # Landing piece checking
-                                npiece = self.board_obj.board[npos[0],npos[1]]
-                                if npiece in pieces: break
-                                if npiece in epieces: 
-                                    moves.append(np.array([pos,npos]))
-                                    move_strs.append(self.board_obj.move_to_str(np.array([pos,npos])))
-                                    break
-                                moves.append(np.array([pos,npos]))
-                                move_strs.append(self.board_obj.move_to_str(np.array([pos,npos])))
-        return np.array(moves), move_strs
-
+                            if npiece in epieces or npiece == ".": 
+                                moves.append((pos,npos))
+                                continue
+                    else:
+                    # Every other piece here
+                        for k in range(1,9):
+                            npos = pos + idir * k
+                            # OOB checking
+                            # Landing piece checking
+                            npiece = board[npos]
+                            if (npiece == " "): break
+                            if npiece in pieces: break
+                            if npiece in epieces: 
+                                moves.append((pos,npos))
+                                break
+                            moves.append((pos,npos))
+        return moves
     # eof Lower level    

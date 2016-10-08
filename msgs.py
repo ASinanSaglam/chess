@@ -58,6 +58,17 @@ class ValidMove(BaseMsg):
         self.player = player
         self.board = board
 
+class InvalidMove(BaseMsg):
+    '''
+    Invalid move move
+    '''
+    def __init__(self, content=None, mtype='INVALID_MOVE', raw_text='', player=None, board=None):
+        self.content = content
+        self.raw_text = raw_text
+        self.mtype = mtype
+        self.player = player
+        self.board = board
+
 class ProcessedMove(BaseMsg):
     '''
     From board handler, confirming that the move is made on the current board
@@ -151,6 +162,15 @@ class ShowHistory(BaseMsg):
         self.content = content
         self.mtype = mtype
         self.tmodule = tmodule
+
+class CurrentBoard(BaseMsg):
+    '''
+    Board handler msg that shows the current state of the board
+    '''
+    def __init__(self, content=None, mtype='CURRENT_BOARD', board=None):
+        self.content = content
+        self.mtype = mtype
+        self.board = board 
 
 # Msges to display driver
 class RenderBoard(BaseMsg):

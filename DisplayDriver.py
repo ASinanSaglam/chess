@@ -27,6 +27,8 @@ class DisplayDriver(BaseModule):
             self.send_to_bus(GetInput(inptype="COMMAND", Menus=msg.Menus))
         elif msg.mtype == "RENDER_HISTORY":
             self.render_history(msg)
+        elif msg.mtype == "CURRENT_BOARD":
+            self.board = msg.board
         else:
             pass
     ## eof Module level
@@ -150,13 +152,22 @@ class BoardDisplay(BaseModule):
         else:
             self._displayMoveNoTerm(msg)
 
+    def displayBoard(self, board):
+        if self.DisplayDriver.term:
+            self._displayMoveTerm(None,board=board)
+        else:
+            self._displayMoveNoTerm(None,board=board)
+
     def get_turn(self):
         board = self.board
         return int(board[0])
 
-    def _displayMoveNoTerm(self,msg):
-        self.board = msg.board
-        turn = self.get_turn()
+    def _displayMoveNoTerm(self,msg,board=None):
+        if not board:
+            self.board = msg.board
+            turn = self.get_turn()
+        else:
+            turn = int(board[0])
 
         if not turn:
             print("###################################")        
@@ -164,11 +175,17 @@ class BoardDisplay(BaseModule):
         else:
             print("###################################")        
             print("#####   Blacks turn to play   #####")
-        self._printBoardNoTerm()
+        if not board:
+            self._printBoardNoTerm()
+        else:
+            self._printBoardNoTerm(board=board)
 
     def _displayMoveTerm(self,msg):
-        self.board = msg.board
-        turn = self.get_turn()
+        if not board:
+            self.board = msg.board
+            turn = self.get_turn()
+        else:
+            turn = int(board[0])
 
         t = self.DisplayDriver.term
         h, w = t.height, t.width
@@ -181,7 +198,10 @@ class BoardDisplay(BaseModule):
             print(t.move(h/2-(h/4),0) + "{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
             print("{0:{fill}{align}{width}}".format(" Blacks turn to play ", fill="#", align="^", width=w) )
             print("{0:{fill}{align}{width}}".format("", fill="#", align="<", width=w))
-        self._printBoardTerm()
+        if not board:
+            self._printBoardNoTerm()
+        else:
+            self._printBoardNoTerm(board=board)
 
 
     def trPiece(self, piece):
@@ -192,7 +212,7 @@ class BoardDisplay(BaseModule):
         """
         return self.pieceDict[piece]
 
-    def _printBoardNoTerm(self):
+    def _printBoardNoTerm(self, board=None):
         """
         A way to print the board to the output. For now it only uses
         print but later we should implement stuff to deal with commandlines
@@ -201,27 +221,31 @@ class BoardDisplay(BaseModule):
         Returns:
           Nothing, just prints the board. 
         """
-        board = self.board[31:109]
+
+        if not board:
+            board = self.board[31:109]
+        else:
+            board = board[31:109]
         board = u"".join(board.split())
         board = map(self.trPiece, board)
         board = u"".join(board)
         #print("Current Board State")
         print("###################################")        
         print("   --------------------------")
-        print( u" 8 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[0:8])) 
-        print( u" 7 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[8:16])) 
-        print( u" 6 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[16:24])) 
-        print( u" 5 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[24:32])) 
-        print( u" 4 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[32:40])) 
-        print( u" 3 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[40:48])) 
-        print( u" 2 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[48:56])) 
-        print( u" 1 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[56:64])) 
+        print( u" 8 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[0:8])) 
+        print( u" 7 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[8:16])) 
+        print( u" 6 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[16:24])) 
+        print( u" 5 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[24:32])) 
+        print( u" 4 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[32:40])) 
+        print( u" 3 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[40:48])) 
+        print( u" 2 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[48:56])) 
+        print( u" 1 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[56:64])) 
         print("   --------------------------")
         print( "     {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  "\
                      .format(*['A','B','C','D','E','F','G','H',]))
         print("###################################")        
 
-    def _printBoardTerm(self):
+    def _printBoardTerm(self, board=None):
         """
         A way to print the board to the output. For now it only uses
         print but later we should implement stuff to deal with commandlines
@@ -234,20 +258,23 @@ class BoardDisplay(BaseModule):
         t = self.DisplayDriver.term
         h, w = t.height, t.width
 
-        board = self.board[31:109]
+        if not board:
+            board = self.board[31:109]
+        else:
+            board = board[31:109]
         board = u"".join(board.split())
         board = map(self.trPiece, board)
         board = u"".join(board)
         print("")
         print("{0:{align}{width}}".format("   --------------------------", align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 8 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[0:8]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 7 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[8:16]), align="^", width=w)) 
-        print(u'{0:{align}{width}}'.format(u" 6 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[16:24]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 5 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[24:32]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 4 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[32:40]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 3 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[40:48]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 2 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[48:56]), align="^", width=w))
-        print(u'{0:{align}{width}}'.format(u" 1 | {7}  {6}  {5}  {4}  {3}  {2}  {1}  {0} |".format(*board[56:64]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 8 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[0:8]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 7 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[8:16]), align="^", width=w)) 
+        print(u'{0:{align}{width}}'.format(u" 6 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[16:24]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 5 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[24:32]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 4 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[32:40]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 3 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[40:48]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 2 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[48:56]), align="^", width=w))
+        print(u'{0:{align}{width}}'.format(u" 1 | {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7} |".format(*board[56:64]), align="^", width=w))
         print("{0:{align}{width}}".format("   --------------------------", align="^", width=w))
         print("{0:{align}{width}}".format( "     {0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  "\
                      .format(*['A','B','C','D','E','F','G','H',]), align="^", width=w))

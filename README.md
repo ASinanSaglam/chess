@@ -22,5 +22,8 @@ with a simple scoring function?
 win/lose, stalemate etc.
 
 5) Added basic tab completion but the completer is unaware of the current
-menu. Will need tweaking in the future. At some point will need to rethink 
-how menus actually work.
+menu. Will need tweaking in the future. 
+
+6) Board state now stored as a string of 130 chars, menus reimplemented
+and additional functionality is now in place. Also new template added
+for the structuring of future modules

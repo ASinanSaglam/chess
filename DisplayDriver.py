@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-import numpy as np
-
 from base_modules import BaseModule
 from msgs import GetInput, QuitGame, GotoMenu, ShowBoard
 
